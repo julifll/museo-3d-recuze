@@ -1,0 +1,12 @@
+# Carpetas de dependencias
+node_modules/
+package-lock.json
+
+# Archivos de variables de entorno y credenciales
+.env
+
+# Archivos del sistema operativo y editores
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiosco - Museo 3D ReCuZe</title>
+    <link rel="icon" type="image/svg+xml" href="assets/icons/favicon.svg">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="js/app.js" defer></script>
+</head>
+<body>
+    <main class="kiosko-container">
+
+        <!-- Pantalla 1: Bienvenida -->
+        <section id="pantalla-bienvenida" class="screen active" role="main" aria-label="Pantalla de bienvenida">
+            <img src="assets/img/logo-museo.png" alt="Logotipo Museo 3D Zenú" class="logo-principal">
+            <h1>¡Hola querido visitante!</h1>
+            <p>Bienvenido a nuestro Museo 3D: Rescatando la Cultura Zenú</p>
+
+            <div class="actions">
+                <button id="btn-iniciar-registro" type="button" class="btn-primary">Regístrate</button>
+                <button id="btn-iniciar-sesion" type="button" class="btn-outline">Inicia sesión</button>
+            </div>
+        </section>
+
+       <!-- Pantalla 2 Formulario de registro -->
+        <!-- Se oculta inicialmente con la clase "hidden" -->
+        <section id="pantalla-registro" class="screen" role="main" aria-label="Formulario de registro">
+            <header>
+                <img src="assets/img/logo-museo.png" alt="Logotipo Museo 3D Zenú" class="logo-secundario">
+                <h2>Registro</h2>
+            </header>
+
+             <form id="registro-visitantes-form" novalidate>
+                <div class="form-group">
+                    <label for="nombre">Nombre:</label>
+                    <input type="text" id="nombre" name="nombre" required>
+                    <p id="error-nombre" class="field-error" aria-live="polite"></p>
+                </div>
+
+                <div class="form-group">
+                    <label for="apellido">Apellido:</label>
+                    <input type="text" id="apellido" name="apellido" required>
+                    <p id="error-apellido" class="field-error" aria-live="polite"></p>
+                </div>
+
+                <div class="form-group">
+                    <label for="lugar_residencia">Lugar donde reside:</label>
+                    <input type="text" id="lugar_residencia" name="lugar_residencia" required>
+                    <p id="error-lugar_residencia" class="field-error" aria-live="polite"></p>
+                </div>
+
+                <div class="form-group">
+                    <label for="edad">Edad:</label>
+                    <input type="tel" id="edad" name="edad" min="1" required>
+                    <p id="error-edad" class="field-error" aria-live="polite"></p>
+                </div>
+
+                <div class="form-group">
+                    <label for="numero_identificacion">Número de identificación:</label>
+                    <input type="text" id="numero_identificacion" name="numero_identificacion" inputmode="numeric" maxlength="20" required>
+                    <p id="error-numero_identificacion" class="field-error" aria-live="polite"></p>
+                </div>
+
+                <div class="form-group">
+                    <label for="correo">Correo electrónico:</label>
+                    <input type="email" id="correo" name="correo" required>
+                    <p id="error-correo" class="field-error" aria-live="polite"></p>
+                </div>
+
+                <div class="form-group">
+                    <label for="contrasena">Contraseña:</label>
+                    <input type="password" id="contrasena" name="contrasena" minlength="4" maxlength="8" required>
+<small>Máximo 8 caracteres (puedes usar mayúsculas, minúsculas y números).</small>
+                    <p id="error-contrasena" class="field-error" aria-live="polite"></p>
+                </div>
+
+                <div class="form-group">
+                    <label for="grado">Grado:</label>
+                    <select id="grado" name="grado">
+                        <option value="pre-jardin">Pre-jardín</option>
+                        <option value="jardin">Jardín</option>
+                        <option value="transicion">Transición</option>
+                        <option value="1°">1°</option>
+                        <option value="2°-1">2°-1</option>
+                        <option value="2°-2">2°-2</option>
+                        <option value="3°-1">3°-1</option>
+                        <option value="3°-2">3°-2</option>
+                        <option value="4°-1">4°-1</option>
+                        <option value="4°-2">4°-2</option>
+                        <option value="5°-1">5°-1</option>
+                        <option value="5°-2">5°-2</option>
+                        <option value="6°-1">6°-1</option>
+                        <option value="6°-2">6°-2</option>
+                        <option value="7°-1">7°-1</option>
+                        <option value="7°-2">7°-2</option>
+                        <option value="8°-1">8°-1</option>
+                        <option value="8°-2">8°-2</option>
+                        <option value="9°-1">9°-1</option>
+                        <option value="9°-2">9°-2</option>
+                        <option value="10°">10°</option>
+                        <option value="11°">11°</option> 
+                    </select>
+                    <p id="error-grado" class="field-error" aria-live="polite"></p>
+                </div>
+
+                <!-- Requisito Crítico: Autorización de datos personales -->
+                <div class="form-group checkbox-group">
+                    <input type="checkbox" id="autoriza_datos" name="autoriza_datos" required>
+                    <label for="autoriza_datos">Autorizo el tratamiento de mis datos personales (Ley 1581 de 2012)</label>
+                </div>
+                <p id="error-autoriza_datos" class="field-error" aria-live="polite"></p>
+
+                <p id="error-general-registro" class="field-error" role="alert" aria-live="assertive"></p>
+
+                <!-- Botones Híbridos ( + Ícono local) -->
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary">
+                        Aceptar <img src="assets/icons/check.svg" alt="" aria-hidden="true">
+                    </button>
+                    <button type="button" id="btn-cancelar" class="btn-secondary">
+                        Cancelar <img src="assets/icons/close.svg" alt="" aria-hidden="true">
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <!-- Pantalla 3: Registro exitoso -->
+        <section id="pantalla-exito" class="screen" role="main" aria-label="Confirmación de registro exitoso">
+            <header>
+                <img src="assets/img/logo-museo.png" alt="Logotipo Museo 3D Zenú" class="logo-secundario">
+                <h2 id="exito-titulo">¡Gracias por registrarte!</h2>
+            </header>
+            <p>Tu registro ha sido exitoso. Ahora puedes explorar la galería de piezas y aprender más sobre la Cultura Zenú.</p>
+            <div id="registro-exito-info" style="background-color: #f0f0f0; padding: 15px; border-radius: 10px; margin: 15px 0; border-left: 4px solid #60D1E7;">
+                <p id="registro-exito-nombre" style="margin: 0; font-weight: 500; color: #666;"></p>
+            </div>
+
+            <div class="actions">
+                <button id="btn-volver-inicio" type="button" class="btn-primary">Volver al Inicio</button>
+            </div>
+        </section>
+
+        <!-- Pantalla 4: Iniciar sesión -->
+        <section id="pantalla-inicio-sesion" class="screen" role="main" aria-label="Formulario de inicio de sesión">
+            <header>
+                <img src="assets/img/logo-museo.png" alt="Logotipo Museo 3D Zenú" class="logo-secundario">
+                <h2>Iniciar Sesión</h2>
+            </header>
+            
+            <form id="inicio-sesion-form" novalidate>
+                <div class="form-group">
+                    <label for="correo_sesion">Correo electrónico:</label>
+                    <input type="email" id="correo_sesion" name="correo_sesion" required>
+                    <p id="error-correo_sesion" class="field-error" aria-live="polite"></p>
+                </div>
+
+                <div class="form-group">
+                    <label for="codigo-acceso">Contraseña:</label>
+                    <input type="password" id="codigo-acceso" name="codigo-acceso" required maxlength="8" autocomplete="off">
+                    <p id="error-codigo-acceso" class="field-error" aria-live="polite"></p>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary">
+                        Ingresar <img src="assets/icons/check.svg" alt="" aria-hidden="true">
+                    </button>
+                    <button type="button" id="btn-cancelar-sesion" class="btn-secondary">
+                        Volver <img src="assets/icons/close.svg" alt="" aria-hidden="true">
+                    </button>
+                </div>
+            </form>
+        </section>
+
+    </main>
+</body>
+</html>
