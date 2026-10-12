@@ -14,7 +14,7 @@ Desplegado sobre red Wi-Fi local privada mediante router residencial Cisco, perm
 ## Instrucciones de Instalación Local
 1. Clona este repositorio:
    ```bash
-   git clone https://github.com/TU-USUARIO/museo-3d-recuze.git
+   git clone https://github.com/julifll/museo-3d-recuze.git
 2. Importa el archivo SQL museo_recuze_db.sql en phpMyAdmin.
 
 3. Ingresa a la carpeta server, copia el archivo .env.example a .env e instala dependencias:
