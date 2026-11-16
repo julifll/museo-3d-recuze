@@ -1,6 +1,6 @@
 # Carpetas de dependencias
 node_modules/
-package-lock.json
+
 
 # Archivos de variables de entorno y credenciales
 .env
@@ -10,3 +10,8 @@ package-lock.json
 Thumbs.db
 .vscode/
 .idea/
+contenido/videos/
+respaldos/
+*.sql~
+*.crdownload
+respaldo.sql

@@ -1,238 +1,306 @@
 document.addEventListener('DOMContentLoaded', () => {
-  const screens = Array.from(document.querySelectorAll('.screen'));
-  let visitantRegistrado = {};
+  const INACTIVIDAD_MS = 90 * 1000;
+  const EXPRESION_DOCUMENTO = /^\d{6,20}$/;
+  const EXPRESION_CORREO = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const INICIO = 'pantalla-bienvenida';
 
-  /*Función para obtener fecha y hora*/
-  function obtenerFechaHora() {
-    const ahora = new Date();
-    
-    const dia = String(ahora.getDate()).padStart(2, '0');
-    const mes = String(ahora.getMonth() + 1).padStart(2, '0');
-    const anio = ahora.getFullYear();
-    
-    const horas = String(ahora.getHours()).padStart(2, '0');
-    const minutos = String(ahora.getMinutes()).padStart(2, '0');
-    const segundos = String(ahora.getSeconds()).padStart(2, '0');
-    
-    return {
-      fecha: `${dia}/${mes}/${anio}`,
-      hora: `${horas}:${minutos}:${segundos}`,
-      fechaCompleta: `${dia}/${mes}/${anio} a las ${horas}:${minutos}:${segundos}`
-    };
+  const $ = (id) => document.getElementById(id);
+  const pantallas = [...document.querySelectorAll('.screen')];
+  let pantallaActual = INICIO;
+  let temporizador = null;
+
+  // Crea un elemento con clase y texto (el texto se pone como texto, no como HTML)
+  function crear(etiqueta, clase, texto) {
+    const nodo = document.createElement(etiqueta);
+    if (clase) nodo.className = clase;
+    if (texto !== undefined) nodo.textContent = texto;
+    return nodo;
   }
 
-  
-  /*Función de navegación*/
-  function showScreen(id) {
-    // Remueve la clase 'active' de TODAS las pantallas
-    screens.forEach(screen => {
-      screen.classList.remove('active');
-    });
-    
-    // Agrega la clase 'active' SOLO a la pantalla solicitada
-    const targetScreen = document.getElementById(id);
-    if (targetScreen) {
-      targetScreen.classList.add('active');
-      console.log(`Pantalla activa: ${id}`);
-    } else {
-      console.warn(`Pantalla no encontrada: ${id}`);
-    }
+  /* ---------- Navegación e inactividad ---------- */
+
+  function detenerVideos() {
+    document.querySelectorAll('video').forEach((v) => v.pause());
   }
 
-  const clearFormErrors = (form) => {
-    form.querySelectorAll('.field-error').forEach(error => {
-      error.textContent = '';
+  function programarInactividad() {
+    clearTimeout(temporizador);
+    if (pantallaActual !== INICIO) temporizador = setTimeout(volverAlInicio, INACTIVIDAD_MS);
+  }
+
+  function mostrarPantalla(id) {
+    pantallaActual = id;
+    pantallas.forEach((p) => { p.hidden = p.id !== id; });
+    detenerVideos();
+    window.scrollTo(0, 0);
+    // El título recibe el foco para que lectores de pantalla y teclado sepan dónde están
+    $(id).querySelector('[tabindex="-1"]')?.focus({ preventScroll: true });
+    programarInactividad();
+  }
+
+  function limpiarErrores(formulario) {
+    formulario.querySelectorAll('.field-error').forEach((e) => { e.textContent = ''; });
+    formulario.querySelectorAll('.invalid').forEach((e) => e.classList.remove('invalid'));
+  }
+
+  // Deja los formularios y los datos como si nadie hubiera pasado por el quiosco
+  function volverAlInicio() {
+    ['registro-visitantes-form', 'inicio-sesion-form'].forEach((id) => {
+      const formulario = $(id);
+      formulario.reset();
+      limpiarErrores(formulario);
     });
+    document.querySelectorAll('[data-mostrar]').forEach((casilla) => { $(casilla.dataset.mostrar).type = 'password'; });
+    $('apodos-opciones').replaceChildren();
+    $('recorrido-lista').replaceChildren();
+    mostrarPantalla(INICIO);
+  }
 
-    form.querySelectorAll('input').forEach(input => {
-      input.classList.remove('invalid');
-    });
-  };
+  ['pointerdown', 'keydown', 'input', 'scroll'].forEach((evento) => {
+    window.addEventListener(evento, programarInactividad, { passive: true });
+  });
 
-  const setFieldError = (fieldName, message) => {
-    const input = document.querySelector(`[name="${fieldName}"]`);
-    const error = document.getElementById(`error-${fieldName}`);
+  // Si la página vuelve desde la memoria del navegador (botón "atrás"), no debe mostrar datos de otro niño
+  window.addEventListener('pageshow', (e) => { if (e.persisted) volverAlInicio(); });
 
-    if (input) {
-      input.classList.add('invalid');
-    }
+  /* ---------- Servidor ---------- */
 
-    if (error) {
-      error.textContent = message;
-    }
-  };
-
-  // Llama al servidor con rutas relativas (funciona desde cualquier IP de la LAN)
-  async function enviar(url, cuerpo) {
+  // Rutas relativas: funcionan desde cualquier IP de la red local
+  async function pedir(url, cuerpo) {
     try {
-      const resp = await fetch(url, {
+      const opciones = cuerpo === undefined ? undefined : {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(cuerpo)
-      });
+      };
+      const resp = await fetch(url, opciones);
       const datos = await resp.json().catch(() => ({}));
-      return { ok: resp.ok && datos.ok, estado: resp.status, datos };
-    } catch (e) {
-      return { ok: false, estado: 0, datos: { mensaje: 'No hay conexión con el servidor del museo.' } };
+      return { estado: resp.status, datos };
+    } catch {
+      return { estado: 0, datos: { mensaje: 'No hay conexión con el servidor del museo. Avisa a un guía.' } };
     }
   }
 
-  function mostrarErroresServidor(datos) {
-    const errores = datos.errores || {};
-    const campos = Object.keys(errores);
-    campos.forEach((campo) => setFieldError(campo, errores[campo]));
-    if (!campos.length) {
-      const general = document.getElementById('error-general-registro');
-      if (general) general.textContent = datos.mensaje || 'No se pudo completar el registro.';
-    }
+  function ponerError(campo, mensaje) {
+    const entrada = document.querySelector(`[name="${campo}"]`);
+    if (entrada && entrada.type !== 'radio') entrada.classList.add('invalid');
+    const aviso = $(`error-${campo}`);
+    if (aviso) aviso.textContent = mensaje;
   }
 
-  document.getElementById('btn-iniciar-registro')?.addEventListener('click', () => {
-    showScreen('pantalla-registro');
+  /* ---------- Botones de navegación ---------- */
+
+  $('btn-iniciar-registro').addEventListener('click', () => {
+    mostrarPantalla('pantalla-registro');
+    cargarApodos();
+  });
+  $('btn-iniciar-sesion').addEventListener('click', () => mostrarPantalla('pantalla-inicio-sesion'));
+  ['btn-cancelar', 'btn-cancelar-sesion', 'btn-volver-inicio', 'btn-cerrar-recorrido'].forEach((id) => {
+    $(id).addEventListener('click', volverAlInicio);
   });
 
-  document.getElementById('btn-iniciar-sesion')?.addEventListener('click', () => {
-    showScreen('pantalla-inicio-sesion');
+  // "Mostrar contraseña": un solo oyente para todas las casillas
+  document.addEventListener('change', (e) => {
+    const casilla = e.target.closest?.('[data-mostrar]');
+    if (casilla) $(casilla.dataset.mostrar).type = casilla.checked ? 'text' : 'password';
   });
 
-  document.getElementById('btn-cancelar')?.addEventListener('click', () => {
-    showScreen('pantalla-bienvenida');
-  });
+  /* ---------- Registro ---------- */
 
-  document.getElementById('btn-cancelar-sesion')?.addEventListener('click', () => {
-    showScreen('pantalla-bienvenida');
-  });
+  function crearOpcionApodo(texto) {
+    const etiqueta = crear('label', 'apodo-opcion');
+    const radio = document.createElement('input');
+    radio.type = 'radio';
+    radio.name = 'apodo';
+    radio.value = texto;
+    etiqueta.append(radio, crear('span', '', texto));
+    return etiqueta;
+  }
 
-  document.getElementById('btn-volver-inicio')?.addEventListener('click', () => {
-    visitantRegistrado = {};
-    showScreen('pantalla-bienvenida');
-  });
-
-  const registerForm = document.getElementById('registro-visitantes-form');
-
-  registerForm?.addEventListener('submit', async (event) => {
-    event.preventDefault();
-    clearFormErrors(registerForm);
-    const generalError = document.getElementById('error-general-registro');
-    if (generalError) generalError.textContent = '';
-
-    const data = new FormData(registerForm);
-    const nombre = String(data.get('nombre') || '').trim();
-    const apellido = String(data.get('apellido') || '').trim();
-    const residencia = String(data.get('lugar_residencia') || '').trim();
-    const edad = Number(data.get('edad'));
-    const numeroIdentificacion = String(data.get('numero_identificacion') || '').trim();
-    const correo = String(data.get('correo') || '').trim();
-    const contrasena = String(data.get('contrasena') || '').trim();
-    const grado = String(data.get('grado') || '').trim();
-    const autoriza = data.get('autoriza_datos') === 'on';
-
-    let hasError = false;
-
-    if (!nombre || nombre.length < 2) {
-      setFieldError('nombre', 'Escribe tu nombre completo.');
-      hasError = true;
+  async function cargarApodos() {
+    const boton = $('btn-otros-apodos');
+    boton.disabled = true;
+    $('error-apodo').textContent = '';
+    const { estado, datos } = await pedir('/api/apodos');
+    boton.disabled = false;
+    if (estado !== 200 || !Array.isArray(datos.opciones)) {
+      $('apodos-opciones').replaceChildren();
+      $('error-apodo').textContent = datos.mensaje || 'No se pudieron cargar los apodos. Avisa a un guía.';
+      return;
     }
+    $('apodos-opciones').replaceChildren(...datos.opciones.map(crearOpcionApodo));
+  }
+  $('btn-otros-apodos').addEventListener('click', cargarApodos);
 
-    if (!apellido || apellido.length < 2) {
-      setFieldError('apellido', 'Escribe tu apellido.');
-      hasError = true;
-    }
+  // Revisión rápida para ayudar al niño; el servidor vuelve a revisar todo
+  function revisarRegistro(r) {
+    const errores = {};
+    if (r.nombre.length < 2) errores.nombre = 'Escribe tu nombre.';
+    if (r.apellido.length < 2) errores.apellido = 'Escribe tu apellido.';
+    if (r.lugar_residencia.length < 3) errores.lugar_residencia = 'Indica dónde vives.';
+    if (!Number.isInteger(r.edad) || r.edad < 1 || r.edad > 120) errores.edad = 'La edad debe ser un número.';
+    if (!EXPRESION_DOCUMENTO.test(r.numero_identificacion)) errores.numero_identificacion = 'Escribe tu documento: solo números, entre 6 y 20.';
+    if (r.correo && !EXPRESION_CORREO.test(r.correo)) errores.correo = 'Ese correo no es válido. Déjalo vacío si no tienes.';
+    if (r.contrasena.length < 4 || r.contrasena.length > 8) errores.contrasena = 'La contraseña debe tener entre 4 y 8 caracteres.';
+    if (!r.grado) errores.grado = 'Elige tu grado.';
+    if (!r.apodo) errores.apodo = 'Elige uno de los apodos.';
+    if (!r.autoriza_datos) errores.autoriza_datos = 'Debes autorizar el tratamiento de tus datos.';
+    return errores;
+  }
 
-    if (!residencia || residencia.length < 3) {
-      setFieldError('lugar_residencia', 'Indica tu lugar de residencia.');
-      hasError = true;
-    }
+  const formularioRegistro = $('registro-visitantes-form');
+  formularioRegistro.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    limpiarErrores(formularioRegistro);
 
-    if (!Number.isInteger(edad) || edad < 1 || edad > 120) {
-      setFieldError('edad', 'La edad debe ser un número válido.');
-      hasError = true;
-    }
+    const datos = new FormData(formularioRegistro);
+    const texto = (nombre) => String(datos.get(nombre) ?? '').trim();
+    const registro = {
+      nombre: texto('nombre'),
+      apellido: texto('apellido'),
+      lugar_residencia: texto('lugar_residencia'),
+      edad: Number(datos.get('edad')),
+      numero_identificacion: texto('numero_identificacion'),
+      correo: texto('correo'),
+      contrasena: String(datos.get('contrasena') ?? ''), // sin recortar: igual que en el ingreso
+      grado: texto('grado'),
+      apodo: texto('apodo'),
+      autoriza_datos: datos.get('autoriza_datos') === 'on'
+    };
 
-    if (!/^\d{6,20}$/.test(numeroIdentificacion)) {
-      setFieldError('numero_identificacion', 'Ingresa un número de identificación válido.');
-      hasError = true;
-    }
-
-    const correoValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(correo);
-    if (!correoValido) {
-      setFieldError('correo', 'Ingresa un correo electrónico válido.');
-      hasError = true;
-    }
-
-    if (!contrasena || contrasena.length < 4 || contrasena.length > 8) {
-      setFieldError('contrasena', 'La contraseña debe tener entre 4 y 8 caracteres.');
-      hasError = true;
-    }
-
-    if (!autoriza) {
-      setFieldError('autoriza_datos', 'Debes autorizar el tratamiento de tus datos.');
-      hasError = true;
-    }
-
-    if (hasError) {
+    const errores = revisarRegistro(registro);
+    if (Object.keys(errores).length > 0) {
+      Object.entries(errores).forEach(([campo, mensaje]) => ponerError(campo, mensaje));
+      formularioRegistro.querySelector('.invalid')?.focus();
       return;
     }
 
-    const fechaHora = obtenerFechaHora();
-    const resp = await enviar('http://localhost:3000/api/visitantes', {
-      nombre, apellido, lugar_residencia: residencia, edad,
-      numero_identificacion: numeroIdentificacion, correo, contrasena, grado, autoriza_datos: true
-    });
+    const boton = formularioRegistro.querySelector('[type="submit"]');
+    boton.disabled = true;
+    const { estado, datos: respuesta } = await pedir('/api/visitantes', registro);
+    boton.disabled = false;
 
-    if (!resp.ok) {
-      mostrarErroresServidor(resp.datos);
+    if (estado === 201 && respuesta.ok) {
+      $('exito-apodo').textContent = respuesta.apodo || registro.apodo;
+      formularioRegistro.reset();
+      $('apodos-opciones').replaceChildren();
+      mostrarPantalla('pantalla-exito');
       return;
     }
 
-    visitantRegistrado = { nombre: `${nombre} ${apellido}` };
-    registerForm.reset();
-
-    document.getElementById('registro-exito-nombre').textContent = `Registrado el ${fechaHora.fechaCompleta}`;
-    document.getElementById('exito-titulo').textContent = `¡Bienvenido, ${nombre}!`;
-
-    showScreen('pantalla-exito');
+    const erroresServidor = respuesta.errores ?? {};
+    const { apodo, ...otros } = erroresServidor;
+    Object.entries(otros).forEach(([campo, mensaje]) => ponerError(campo, mensaje));
+    if (apodo) {
+      // El apodo se ocupó o no era válido: se piden opciones nuevas
+      await cargarApodos();
+      ponerError('apodo', apodo);
+    }
+    if (Object.keys(erroresServidor).length === 0) {
+      $('error-general-registro').textContent = respuesta.mensaje || 'No se pudo completar el registro.';
+    }
   });
 
-  const loginForm = document.getElementById('inicio-sesion-form');
+  /* ---------- Ingreso a "Mi recorrido" ---------- */
 
-  loginForm?.addEventListener('submit', async (event) => {
-    event.preventDefault();
-    clearFormErrors(loginForm);
+  const formularioSesion = $('inicio-sesion-form');
+  formularioSesion.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    limpiarErrores(formularioSesion);
 
-    const emailValue = String(document.getElementById('correo_sesion')?.value || '').trim();
-    const codeValue = String(document.getElementById('codigo-acceso')?.value || '').trim();
-
-    const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailValue);
-    if (!emailOk) {
-      setFieldError('correo_sesion', 'Ingresa un correo válido.');
+    const documento = $('doc-sesion').value.trim();
+    const clave = $('clave-sesion').value;
+    let hayError = false;
+    if (!EXPRESION_DOCUMENTO.test(documento)) {
+      ponerError('doc-sesion', 'Escribe tu documento: solo números.');
+      hayError = true;
     }
-
-    if (!codeValue || codeValue.length < 4) {
-      setFieldError('codigo-acceso', 'El código debe tener al menos 4 caracteres.');
+    if (!clave) {
+      ponerError('clave-sesion', 'Escribe tu contraseña.');
+      hayError = true;
     }
+    if (hayError) return;
 
-    if (!emailOk || !codeValue || codeValue.length < 4) {
+    const boton = $('btn-entrar');
+    boton.disabled = true;
+    const { estado, datos } = await pedir('/api/login', { numero_identificacion: documento, contrasena: clave });
+    boton.disabled = false;
+    $('clave-sesion').value = ''; // la contraseña no se queda escrita en la pantalla
+
+    if (estado === 200 && datos.ok) {
+      formularioSesion.reset();
+      $('clave-sesion').type = 'password';
+      mostrarRecorrido(datos);
       return;
     }
-
-    const fechaHora = obtenerFechaHora();
-    const resp = await enviar('http://localhost:3000/api/login', { correo: emailValue, contrasena: codeValue });
-
-    if (!resp.ok) {
-      const campo = resp.estado === 401 || resp.estado === 429 ? 'codigo-acceso' : null;
-      const mensaje = resp.datos.mensaje || 'No se pudo iniciar sesión.';
-      if (campo) setFieldError(campo, mensaje);
-      else setFieldError('correo_sesion', mensaje);
-      return;
-    }
-
-    visitantRegistrado = { nombre: `${resp.datos.visitante.nombre} ${resp.datos.visitante.apellido}` };
-    loginForm.reset();
-
-    document.getElementById('registro-exito-nombre').textContent = `Inicio de sesión registrado el ${fechaHora.fechaCompleta}`;
-    document.getElementById('exito-titulo').textContent = '¡Sesión iniciada correctamente!';
-
-    showScreen('pantalla-exito');
+    $('error-general-sesion').textContent = datos.mensaje || `Error inesperado (código ${estado}). Avisa a un guía.`;
   });
+
+  /* ---------- Mi recorrido ---------- */
+
+  function crearPiezaDescubierta(p) {
+    const item = crear('li', 'pieza-descubierta');
+    const detalles = document.createElement('details');
+
+    const resumen = document.createElement('summary');
+    resumen.append(crear('span', '', p.pieza), crear('span', 'pieza-puntos', `+${p.puntos} pts`));
+
+    const cuerpo = crear('div', 'pieza-detalle');
+    const filas = [['Época', p.periodo], ['Material', p.material], ['Procedencia', p.procedencia], ['Tamaño', p.dimensiones]]
+      .filter(([, valor]) => valor);
+    if (filas.length > 0) {
+      const lista = crear('dl', 'ficha-original');
+      filas.forEach(([etiqueta, valor]) => lista.append(crear('dt', '', etiqueta), crear('dd', '', valor)));
+      cuerpo.append(lista);
+    }
+    if (p.historia) cuerpo.append(crear('p', '', p.historia));
+    if (p.fuente) cuerpo.append(crear('p', 'pieza-fuente', `Fuente: ${p.fuente}`));
+    if (typeof p.video === 'string' && p.video.startsWith('/contenido/')) {
+      const video = document.createElement('video');
+      video.controls = true;
+      video.playsInline = true;
+      video.preload = 'none'; // no se descarga hasta que el niño le da play
+      video.src = p.video;
+      cuerpo.append(video);
+    }
+
+    detalles.append(resumen, cuerpo);
+    item.append(detalles);
+    return item;
+  }
+
+  function crearPiezaPendiente() {
+    const item = crear('li', 'pieza-pendiente');
+    const signo = crear('span', 'signo', '?');
+    signo.setAttribute('aria-hidden', 'true');
+    item.append(signo, crear('span', '', 'Pieza por descubrir'));
+    return item;
+  }
+
+  function mostrarRecorrido(d) {
+    const descubiertas = Array.isArray(d.descubiertas) ? d.descubiertas : [];
+    const total = Math.max(Number(d.total_piezas) || 0, descubiertas.length);
+    const hoy = Number(d.piezas_con_puntos_hoy) || 0;
+
+    $('recorrido-saludo').textContent = `¡Hola, ${d.visitante.apodo}!`;
+    $('recorrido-puntos').textContent = String(d.total_puntos);
+    $('recorrido-posicion').textContent = d.posicion
+      ? `Vas en el puesto ${d.posicion} de tu grado (${d.visitante.grado}).`
+      : 'Aún no tienes puntos. ¡Busca las piezas con puntos de hoy!';
+    $('recorrido-progreso').textContent = `Piezas con puntos que has descubierto: ${descubiertas.length} de ${total}`;
+    $('recorrido-hoy').textContent = hoy === 0
+      ? 'Hoy ninguna pieza suma puntos.'
+      : `Hoy ${hoy === 1 ? 'suma puntos 1 pieza' : `suman puntos ${hoy} piezas`}.`;
+
+    $('recorrido-lista').replaceChildren(
+      ...descubiertas.map(crearPiezaDescubierta),
+      ...Array.from({ length: total - descubiertas.length }, crearPiezaPendiente)
+    );
+    mostrarPantalla('pantalla-recorrido');
+  }
+
+  // Si el niño pliega una ficha, su video se pausa
+  $('recorrido-lista').addEventListener('toggle', (e) => {
+    if (e.target.tagName === 'DETAILS' && !e.target.open) e.target.querySelector('video')?.pause();
+  }, true);
 });

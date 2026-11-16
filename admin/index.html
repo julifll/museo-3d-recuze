@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administración - Museo 3D ReCuZe</title>
+    <link rel="stylesheet" href="admin.css">
+    <script src="admin.js" defer></script>
+</head>
+<body>
+    <header class="barra">
+        <h1>Administración del museo</h1>
+        <p>Solo funciona desde este computador.</p>
+    </header>
+
+    <main>
+        <!-- Entrada con la clave de administrador -->
+        <section id="seccion-entrada" aria-labelledby="titulo-entrada">
+            <h2 id="titulo-entrada">Entrar</h2>
+            <form id="form-entrada" class="tarjeta">
+                <label for="clave-admin">Clave de administrador</label>
+                <input type="password" id="clave-admin" autocomplete="off" required>
+                <p id="error-entrada" class="error" role="alert"></p>
+                <button type="submit" class="boton">Entrar</button>
+            </form>
+        </section>
+
+        <!-- Panel (oculto hasta entrar) -->
+        <div id="panel" hidden>
+            <p id="aviso" class="aviso" role="status"></p>
+
+            <section aria-labelledby="titulo-piezas">
+                <h2 id="titulo-piezas">Piezas de hoy</h2>
+                <p class="ayuda">Marca las piezas que <strong>suman puntos hoy</strong> y cuántos puntos dan. Cambiar el valor no modifica los puntos que los niños ya ganaron.</p>
+                <div class="tabla-contenedor">
+                    <table>
+                        <thead>
+                            <tr><th scope="col">Pieza</th><th scope="col">Código</th><th scope="col">Suma puntos hoy</th><th scope="col">Puntos</th><th scope="col">Acción</th></tr>
+                        </thead>
+                        <tbody id="tabla-piezas"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section aria-labelledby="titulo-visitantes">
+                <h2 id="titulo-visitantes">Visitantes</h2>
+                <form id="form-buscar" class="busqueda" role="search">
+                    <label for="buscar">Buscar por documento, apodo, nombre o apellido</label>
+                    <div class="fila">
+                        <input type="search" id="buscar" autocomplete="off" maxlength="50">
+                        <button type="submit" class="boton">Buscar</button>
+                    </div>
+                </form>
+                <p class="ayuda" id="resumen-visitantes"></p>
+                <div class="tabla-contenedor">
+                    <table>
+                        <thead>
+                            <tr><th scope="col">Apodo</th><th scope="col">Nombre</th><th scope="col">Documento</th><th scope="col">Grado</th><th scope="col">Puntos</th><th scope="col">Acciones</th></tr>
+                        </thead>
+                        <tbody id="tabla-visitantes"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section aria-labelledby="titulo-cierre" class="zona-peligro">
+                <h2 id="titulo-cierre">Cierre del evento</h2>
+                <p class="ayuda">Acciones para todos los visitantes a la vez. No se pueden deshacer: haz antes un respaldo.</p>
+                <div class="fila">
+                    <button type="button" class="boton peligro" id="btn-reiniciar-todos">Reiniciar los puntos de todos</button>
+                    <button type="button" class="boton peligro" id="btn-borrar-todos">Borrar a todos los visitantes</button>
+                </div>
+            </section>
+
+            <button type="button" class="boton secundario" id="btn-salir">Salir del administrador</button>
+        </div>
+    </main>
+
+    <!-- Ventana de preguntas y confirmaciones -->
+    <dialog id="dialogo" aria-labelledby="dialogo-titulo">
+        <form method="dialog" id="dialogo-form">
+            <h2 id="dialogo-titulo"></h2>
+            <p id="dialogo-mensaje"></p>
+            <label id="dialogo-etiqueta" for="dialogo-campo" hidden></label>
+            <input id="dialogo-campo" autocomplete="off" hidden>
+            <p id="dialogo-error" class="error" role="alert"></p>
+            <div class="fila">
+                <button type="button" class="boton secundario" id="dialogo-cancelar">Cancelar</button>
+                <button type="submit" value="ok" class="boton" id="dialogo-ok">Aceptar</button>
+            </div>
+        </form>
+    </dialog>
+</body>
+</html>

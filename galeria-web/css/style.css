@@ -148,8 +148,9 @@ a {
   box-shadow: 0 20px 40px rgba(116, 55, 37, 0.12);
 }
 
-.catalogo {
-  padding: 52px 0 72px;
+.catalogo,
+.boveda-zenu {
+  scroll-margin-top: 110px;
 }
 
 .catalog-header {
@@ -167,9 +168,10 @@ a {
 }
 
 .catalog-summary {
-  max-width: 420px;
+  max-width: 60ch;
   line-height: 1.6;
-  margin: 0;
+  margin: 8px 0 0;
+  text-wrap: balance;
 }
 
 .catalog-grid {
@@ -293,4 +295,37 @@ a {
   .btn-secondary {
     width: 100%;
   }
+}
+
+/* Ventana de detalle: elemento <dialog> nativo */
+.modal {
+  border: none;
+  border-radius: 18px;
+  padding: 30px;
+  width: min(90%, 500px);
+  background: var(--color-blanco);
+  text-align: center;
+  box-shadow: 0 20px 40px rgba(116, 55, 37, 0.2);
+}
+.modal::backdrop { background: rgba(0, 0, 0, 0.7); }
+.modal img {
+  border-radius: 12px;
+  margin-bottom: 15px;
+  max-height: 60vh;
+  width: 100%;
+  object-fit: contain;
+  background-color: #f7f2eb;
+}
+.cerrar-modal {
+  position: absolute;
+  top: 10px;
+  right: 14px;
+  padding: 6px 10px;
+  background: none;
+  border: none;
+  font-size: 28px;
+  line-height: 1;
+  font-weight: bold;
+  color: var(--color-marron);
+  cursor: pointer;
 }

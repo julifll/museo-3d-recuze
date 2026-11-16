@@ -9,75 +9,72 @@
     <script src="js/app.js" defer></script>
 </head>
 <body>
-    <main class="kiosko-container">
+    <a class="saltar-contenido" href="#contenido-principal">Saltar al contenido</a>
+    <!-- Un solo <main> para toda la página; las pantallas son secciones y solo una se ve a la vez -->
+    <main id="contenido-principal" class="kiosko-container">
 
         <!-- Pantalla 1: Bienvenida -->
-        <section id="pantalla-bienvenida" class="screen active" role="main" aria-label="Pantalla de bienvenida">
+        <section id="pantalla-bienvenida" class="screen" aria-labelledby="titulo-bienvenida">
             <img src="assets/img/logo-museo.png" alt="Logotipo Museo 3D Zenú" class="logo-principal">
-            <h1>¡Hola querido visitante!</h1>
-            <p>Bienvenido a nuestro Museo 3D: Rescatando la Cultura Zenú</p>
-
+            <h1 id="titulo-bienvenida" tabindex="-1">¡Hola, visitante!</h1>
+            <p class="texto-grande">Bienvenido a nuestro Museo 3D: Rescatando la Cultura Zenú</p>
             <div class="actions">
                 <button id="btn-iniciar-registro" type="button" class="btn-primary">Regístrate</button>
-                <button id="btn-iniciar-sesion" type="button" class="btn-outline">Inicia sesión</button>
+                <button id="btn-iniciar-sesion" type="button" class="btn-outline">Mi recorrido</button>
+                <a class="btn-outline" href="/galeria/#boveda-zenu">Bóveda Zenú</a>
             </div>
         </section>
 
-       <!-- Pantalla 2 Formulario de registro -->
-        <!-- Se oculta inicialmente con la clase "hidden" -->
-        <section id="pantalla-registro" class="screen" role="main" aria-label="Formulario de registro">
+        <!-- Pantalla 2: Registro -->
+        <section id="pantalla-registro" class="screen" aria-labelledby="titulo-registro" hidden>
             <header>
-                <img src="assets/img/logo-museo.png" alt="Logotipo Museo 3D Zenú" class="logo-secundario">
-                <h2>Registro</h2>
+                <img src="assets/img/logo-museo.png" alt="" class="logo-secundario">
+                <h2 id="titulo-registro" tabindex="-1">Registro</h2>
             </header>
-
-             <form id="registro-visitantes-form" novalidate>
+            <form id="registro-visitantes-form" novalidate>
                 <div class="form-group">
                     <label for="nombre">Nombre:</label>
-                    <input type="text" id="nombre" name="nombre" required>
+                    <input type="text" id="nombre" name="nombre" autocomplete="off" required>
                     <p id="error-nombre" class="field-error" aria-live="polite"></p>
                 </div>
-
                 <div class="form-group">
                     <label for="apellido">Apellido:</label>
-                    <input type="text" id="apellido" name="apellido" required>
+                    <input type="text" id="apellido" name="apellido" autocomplete="off" required>
                     <p id="error-apellido" class="field-error" aria-live="polite"></p>
                 </div>
-
                 <div class="form-group">
-                    <label for="lugar_residencia">Lugar donde reside:</label>
-                    <input type="text" id="lugar_residencia" name="lugar_residencia" required>
+                    <label for="lugar_residencia">Lugar donde vives:</label>
+                    <input type="text" id="lugar_residencia" name="lugar_residencia" autocomplete="off" required>
                     <p id="error-lugar_residencia" class="field-error" aria-live="polite"></p>
                 </div>
-
                 <div class="form-group">
                     <label for="edad">Edad:</label>
-                    <input type="tel" id="edad" name="edad" min="1" required>
+                    <input type="number" id="edad" name="edad" inputmode="numeric" min="1" max="120" required>
                     <p id="error-edad" class="field-error" aria-live="polite"></p>
                 </div>
-
                 <div class="form-group">
-                    <label for="numero_identificacion">Número de identificación:</label>
-                    <input type="text" id="numero_identificacion" name="numero_identificacion" inputmode="numeric" maxlength="20" required>
+                    <label for="numero_identificacion">Número de identificación (documento):</label>
+                    <input type="text" id="numero_identificacion" name="numero_identificacion" inputmode="numeric" maxlength="20" autocomplete="off" required>
+                    <small>Solo números, sin puntos ni guiones. Con él entrarás a la Bóveda Zenú.</small>
                     <p id="error-numero_identificacion" class="field-error" aria-live="polite"></p>
                 </div>
-
                 <div class="form-group">
-                    <label for="correo">Correo electrónico:</label>
-                    <input type="email" id="correo" name="correo" required>
+                    <label for="correo">Correo electrónico (opcional):</label>
+                    <input type="email" id="correo" name="correo" autocomplete="off">
+                    <small>Si no tienes correo, déjalo vacío.</small>
                     <p id="error-correo" class="field-error" aria-live="polite"></p>
                 </div>
-
                 <div class="form-group">
-                    <label for="contrasena">Contraseña:</label>
-                    <input type="password" id="contrasena" name="contrasena" minlength="4" maxlength="8" required>
-<small>Máximo 8 caracteres (puedes usar mayúsculas, minúsculas y números).</small>
+                    <label for="contrasena">Contraseña para "Mi recorrido":</label>
+                    <input type="password" id="contrasena" name="contrasena" minlength="4" maxlength="8" autocomplete="new-password" required>
+                    <small>Entre 4 y 8 caracteres. Anótala: si la olvidas, un guía puede darte una nueva.</small>
+                    <label class="mostrar-clave"><input type="checkbox" data-mostrar="contrasena"> Mostrar contraseña</label>
                     <p id="error-contrasena" class="field-error" aria-live="polite"></p>
                 </div>
-
                 <div class="form-group">
                     <label for="grado">Grado:</label>
-                    <select id="grado" name="grado">
+                    <select id="grado" name="grado" required>
+                        <option value="" selected disabled>Elige tu grado</option>
                         <option value="pre-jardin">Pre-jardín</option>
                         <option value="jardin">Jardín</option>
                         <option value="transicion">Transición</option>
@@ -99,21 +96,27 @@
                         <option value="9°-1">9°-1</option>
                         <option value="9°-2">9°-2</option>
                         <option value="10°">10°</option>
-                        <option value="11°">11°</option> 
+                        <option value="11°">11°</option>
                     </select>
                     <p id="error-grado" class="field-error" aria-live="polite"></p>
                 </div>
 
-                <!-- Requisito Crítico: Autorización de datos personales -->
+                <!-- Apodo: el servidor ofrece tres libres; es lo único que se verá en el ranking -->
+                <fieldset class="form-group apodos">
+                    <legend>Elige tu apodo (es el que verán en el ranking):</legend>
+                    <div id="apodos-opciones" class="apodos-opciones"></div>
+                    <button type="button" id="btn-otros-apodos" class="btn-link">Ver otras opciones</button>
+                    <p id="error-apodo" class="field-error" aria-live="polite"></p>
+                </fieldset>
+
+                <!-- Requisito crítico: autorización de datos personales -->
                 <div class="form-group checkbox-group">
                     <input type="checkbox" id="autoriza_datos" name="autoriza_datos" required>
-                    <label for="autoriza_datos">Autorizo el tratamiento de mis datos personales (Ley 1581 de 2012)</label>
+                    <label for="autoriza_datos">Autorizo el tratamiento de mis datos personales (Ley 1581 de 2012). Si soy menor de edad, mi acudiente lo autoriza.</label>
                 </div>
                 <p id="error-autoriza_datos" class="field-error" aria-live="polite"></p>
+                <p id="error-general-registro" class="field-error" role="alert"></p>
 
-                <p id="error-general-registro" class="field-error" role="alert" aria-live="assertive"></p>
-
-                <!-- Botones Híbridos ( + Ícono local) -->
                 <div class="form-actions">
                     <button type="submit" class="btn-primary">
                         Aceptar <img src="assets/icons/check.svg" alt="" aria-hidden="true">
@@ -126,43 +129,43 @@
         </section>
 
         <!-- Pantalla 3: Registro exitoso -->
-        <section id="pantalla-exito" class="screen" role="main" aria-label="Confirmación de registro exitoso">
+        <section id="pantalla-exito" class="screen" aria-labelledby="exito-titulo" hidden>
             <header>
-                <img src="assets/img/logo-museo.png" alt="Logotipo Museo 3D Zenú" class="logo-secundario">
-                <h2 id="exito-titulo">¡Gracias por registrarte!</h2>
+                <img src="assets/img/logo-museo.png" alt="" class="logo-secundario">
+                <h2 id="exito-titulo" tabindex="-1">¡Gracias por registrarte!</h2>
             </header>
-            <p>Tu registro ha sido exitoso. Ahora puedes explorar la galería de piezas y aprender más sobre la Cultura Zenú.</p>
-            <div id="registro-exito-info" style="background-color: #f0f0f0; padding: 15px; border-radius: 10px; margin: 15px 0; border-left: 4px solid #60D1E7;">
-                <p id="registro-exito-nombre" style="margin: 0; font-weight: 500; color: #666;"></p>
+            <p class="texto-grande">Tu apodo es <strong id="exito-apodo"></strong>.</p>
+            <div class="caja-info">
+                <p><strong>Mi recorrido:</strong> entra con tu documento y tu contraseña para ver tus puntos y tus piezas.</p>
+                <p><strong>Bóveda Zenú:</strong> para sumar puntos solo necesitas tu documento y el código de la pieza.</p>
             </div>
-
             <div class="actions">
-                <button id="btn-volver-inicio" type="button" class="btn-primary">Volver al Inicio</button>
+                <a class="btn-primary" href="/galeria/#boveda-zenu">Ir a la Bóveda Zenú</a>
+                <button id="btn-volver-inicio" type="button" class="btn-outline">Volver al inicio</button>
             </div>
         </section>
 
-        <!-- Pantalla 4: Iniciar sesión -->
-        <section id="pantalla-inicio-sesion" class="screen" role="main" aria-label="Formulario de inicio de sesión">
+        <!-- Pantalla 4: Ingreso a "Mi recorrido" -->
+        <section id="pantalla-inicio-sesion" class="screen" aria-labelledby="titulo-sesion" hidden>
             <header>
-                <img src="assets/img/logo-museo.png" alt="Logotipo Museo 3D Zenú" class="logo-secundario">
-                <h2>Iniciar Sesión</h2>
+                <img src="assets/img/logo-museo.png" alt="" class="logo-secundario">
+                <h2 id="titulo-sesion" tabindex="-1">Mi recorrido</h2>
             </header>
-            
             <form id="inicio-sesion-form" novalidate>
                 <div class="form-group">
-                    <label for="correo_sesion">Correo electrónico:</label>
-                    <input type="email" id="correo_sesion" name="correo_sesion" required>
-                    <p id="error-correo_sesion" class="field-error" aria-live="polite"></p>
+                    <label for="doc-sesion">Número de identificación (documento):</label>
+                    <input type="text" id="doc-sesion" name="doc-sesion" inputmode="numeric" maxlength="20" autocomplete="off" required>
+                    <p id="error-doc-sesion" class="field-error" aria-live="polite"></p>
                 </div>
-
                 <div class="form-group">
-                    <label for="codigo-acceso">Contraseña:</label>
-                    <input type="password" id="codigo-acceso" name="codigo-acceso" required maxlength="8" autocomplete="off">
-                    <p id="error-codigo-acceso" class="field-error" aria-live="polite"></p>
+                    <label for="clave-sesion">Contraseña:</label>
+                    <input type="password" id="clave-sesion" name="clave-sesion" maxlength="8" autocomplete="off" required>
+                    <label class="mostrar-clave"><input type="checkbox" data-mostrar="clave-sesion"> Mostrar contraseña</label>
+                    <p id="error-clave-sesion" class="field-error" aria-live="polite"></p>
                 </div>
-
+                <p id="error-general-sesion" class="field-error" role="alert"></p>
                 <div class="form-actions">
-                    <button type="submit" class="btn-primary">
+                    <button type="submit" id="btn-entrar" class="btn-primary">
                         Ingresar <img src="assets/icons/check.svg" alt="" aria-hidden="true">
                     </button>
                     <button type="button" id="btn-cancelar-sesion" class="btn-secondary">
@@ -170,6 +173,25 @@
                     </button>
                 </div>
             </form>
+        </section>
+
+        <!-- Pantalla 5: Mi recorrido (solo lectura) -->
+        <section id="pantalla-recorrido" class="screen" aria-labelledby="recorrido-saludo" hidden>
+            <header>
+                <img src="assets/img/logo-museo.png" alt="" class="logo-secundario">
+                <h2 id="recorrido-saludo" tabindex="-1"></h2>
+            </header>
+            <div class="caja-puntos">
+                <p class="puntos-numero"><span id="recorrido-puntos">0</span> <span class="puntos-unidad">puntos</span></p>
+                <p id="recorrido-posicion"></p>
+            </div>
+            <h3 id="recorrido-progreso"></h3>
+            <p id="recorrido-hoy" class="texto-suave"></p>
+            <ul id="recorrido-lista" class="recorrido-lista"></ul>
+            <div class="actions">
+                <a class="btn-primary" href="/galeria/#boveda-zenu">Ir a la Bóveda Zenú</a>
+                <button id="btn-cerrar-recorrido" type="button" class="btn-outline">Cerrar mi recorrido</button>
+            </div>
         </section>
 
     </main>

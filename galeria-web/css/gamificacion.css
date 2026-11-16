@@ -72,9 +72,6 @@
   border: 1px solid #eee;
 }
 
-.info-icono {
-  font-size: 2rem;
-}
 
 .vector-icono {
   width: 32px;
@@ -148,7 +145,6 @@
 
 .gamificacion-form input:focus,
 .boveda-info select:focus {
-  outline: none;
   border-color: var(--color-azul-claro);
   background-color: white;
   box-shadow: 0 0 0 3px rgba(96, 209, 231, 0.1);
@@ -156,7 +152,7 @@
 
 .form-hint {
   font-size: 0.8rem;
-  color: #999;
+  color: #6b6b6b;
   margin-top: 2px;
 }
 
@@ -211,10 +207,6 @@
   background: linear-gradient(135deg, rgba(244, 67, 54, 0.05) 0%, rgba(244, 67, 54, 0.02) 100%);
 }
 
-.resultado-icono {
-  font-size: 3.5rem;
-  margin-bottom: 12px;
-}
 
 .resultado-titulo {
   font-size: 1.3rem;
@@ -310,3 +302,137 @@
     grid-template-columns: 1fr; /* 1 columna de iconos en celulares muy pequeños */
   }
 }
+
+* Tarjeta informativa: situaciones normales del juego, no son fallos */
+.gamificacion-resultado.info {
+  border-color: var(--color-azul-claro);
+  background: linear-gradient(135deg, rgba(96, 209, 231, 0.08) 0%, rgba(96, 209, 231, 0.02) 100%);
+}
+ 
+.resultado-icono { margin-bottom: 12px; color: var(--color-ocre); }
+.gamificacion-resultado.error .resultado-icono { color: var(--color-error); }
+ 
+.resultado-svg {
+  width: 56px;
+  height: 56px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+ 
+/* Contenido de la tarjeta de descubrimiento */
+.resultado-pieza { font-size: 1.3rem; font-weight: 700; color: var(--color-marron); margin-bottom: 8px; }
+.ficha-titulo { text-align: left; margin: 12px 0 4px; font-size: 1rem; color: var(--color-marron); }
+.ficha-original { text-align: left; margin: 0 0 12px; display: grid; gap: 4px; line-height: 1.7; }
+.ficha-original div { display: flex; flex-wrap: wrap; gap: 6px; }
+.ficha-original dt { font-weight: 700; }
+.ficha-original dt::after { content: ':'; }
+.ficha-original dd { margin: 0; }
+.recompensa-historia { font-size: 0.95rem; color: var(--color-gris-oscuro); text-align: left; line-height: 1.6; }
+.recompensa-fuente { font-size: 0.8rem; color: #6b6b6b; text-align: left; }
+.recompensa-video { text-align: left; margin: 10px 0; }
+.recompensa-video summary { cursor: pointer; }
+.recompensa-video video { width: 100%; border-radius: 12px; margin-top: 8px; }
+.recompensa-aviso { margin-bottom: 15px; }
+.resultado-puntos { margin-bottom: 15px; }
+.ancho-completo { width: 100%; }
+ 
+/* Estilos que antes estaban escritos dentro del HTML */
+.boveda-form-container { margin-bottom: 25px; }
+ol.info-grid { list-style: none; margin: 0; padding: 0; }
+.titulo-con-icono { display: flex; align-items: center; gap: 8px; }
+.ranking-grupo label { display: block; margin-bottom: 6px; }
+.puntos-panel { text-align: center; border-left: 4px solid var(--color-ocre); }
+ 
+/* Accesibilidad: anillo de foco visible para quien navega con teclado */
+:focus-visible { outline: 3px solid var(--color-marron); outline-offset: 2px; }
+ 
+/* Accesibilidad: quien pide menos movimiento en su sistema no ve animaciones */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+ 
+ 
+/* ---------------------------------------------------------------------
+   PARTE B - galeria-web/css/style.css
+   ---------------------------------------------------------------------
+   BORRA estas cuatro reglas del modal anterior:
+     .modal { ... }   .modal-contenido { ... }   .cerrar-modal { ... }   .modal-contenido img { ... }
+   Pega esto en su lugar (y el resto al final del archivo).
+   --------------------------------------------------------------------- */
+ 
+/* Ventana de detalle: elemento <dialog> nativo */
+.modal {
+  border: none;
+  border-radius: 18px;
+  padding: 30px;
+  width: min(90%, 500px);
+  background: var(--color-blanco);
+  text-align: center;
+  box-shadow: 0 20px 40px rgba(116, 55, 37, 0.2);
+}
+.modal::backdrop { background: rgba(0, 0, 0, 0.7); }
+.modal img {
+  border-radius: 12px;
+  margin-bottom: 15px;
+  max-height: 60vh;
+  width: 100%;
+  object-fit: contain;
+  background-color: #f7f2eb;
+}
+.cerrar-modal {
+  position: absolute;
+  top: 10px;
+  right: 14px;
+  padding: 6px 10px;
+  background: none;
+  border: none;
+  font-size: 28px;
+  line-height: 1;
+  font-weight: bold;
+  color: var(--color-marron);
+  cursor: pointer;
+}
+ 
+/* Enlace "Saltar al contenido": aparece solo al navegar con teclado */
+.skip-link {
+  position: absolute;
+  left: 12px;
+  top: -48px;
+  z-index: 2000;
+  padding: 10px 16px;
+  border-radius: 8px;
+  background: var(--color-marron);
+  color: var(--color-blanco);
+}
+.skip-link:focus { top: 12px; }
+ 
+/* Los botones <button> y los enlaces con el mismo estilo se ven igual */
+.btn-primary,
+.btn-secondary {
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+ 
+/* Si ya tienes scroll-margin-top en .catalogo, agrega estas dos secciones a esa misma regla */
+.hero,
+.boveda-zenu { scroll-margin-top: 110px; }
+ 
+/* Pie de página con créditos */
+.site-footer {
+  padding: 28px 0;
+  background: var(--color-gris-oscuro);
+  color: var(--color-blanco);
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+.site-footer p { margin: 0 0 6px; }
+ 
